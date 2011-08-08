@@ -1,0 +1,138 @@
+<html>
+<head>
+    <style>
+        body{
+            width:250;
+            height:275;
+        }
+    </style>
+    <script>
+
+// Replicated elsewhere
+function loadSetting(settingName)
+{
+var settingvar = System.Gadget.Settings.readString(settingName);
+
+if (settingvar == "")
+{
+switch(settingName){
+case "height":
+    settingvar ="160";
+    break
+case "width":
+    settingvar = "130";
+    break
+case "style":
+    settingvar = "white";
+    break
+case "overflow":
+    settingvar = "scroll";
+    break
+case "title":
+    settingvar = "Todo List";
+    break
+case "showtotal":
+    settingvar = true;
+    break
+case "showremaining":
+    settingvar = false;
+    break
+default:
+    settingvar = null;
+    break
+    }
+}
+
+if(settingvar == "True"){settingvar = true;}
+if(settingvar == "False"){settingvar = false;}
+
+return settingvar;
+}
+
+    function init() {
+        var height = loadSetting("height");
+        var width = loadSetting("width");
+        var style = loadSetting("style");
+        var overflow = loadSetting("overflow");
+        var title = loadSetting("title");
+        var showtotal = loadSetting("showtotal");
+        var showremaining = loadSetting("showremaining");
+
+        gadgetTitle.innerText = title;
+        remaining.checked = showremaining;
+        total.checked = showtotal;
+
+        varHeight.innerText = height;
+        varWidth.innerText = width;
+        if (style == "black"){
+            blackselect.selected = true;
+            }
+        else{
+             whiteselect.selected = true;
+        }
+
+        if (overflow == "autofit"){
+            autofitselect.selected = true;
+            }
+        else{
+             scrollselect.selected = true;
+        }
+    }
+
+    System.Gadget.onSettingsClosing = SettingsClosing;
+    function SettingsClosing(event)
+    {
+         if (event.closeAction == event.Action.commit) {
+            var height = varHeight.value;
+            var width = varWidth.value;
+            var style = selectstyle.options[selectstyle.selectedIndex].value;
+            var overflow = selectoverflow.options[selectoverflow.selectedIndex].value;
+            var title = gadgetTitle.value;
+            var showremaining = remaining.checked;
+            var showtotal = total.checked;
+
+            System.Gadget.Settings.writeString("title", title);
+            System.Gadget.Settings.writeString("showremaining", showremaining);
+            System.Gadget.Settings.writeString("showtotal", showtotal);
+            System.Gadget.Settings.writeString("style", style);
+            System.Gadget.Settings.writeString("overflow", overflow);
+            if(!isNaN(height)){
+            System.Gadget.Settings.writeString("height", height);
+            }
+            if(!isNaN(width)){
+            System.Gadget.Settings.writeString("width", width);
+            }
+        }
+
+        event.cancel = false;
+    }
+    </script>
+</head>
+<body onload="init()">
+    <span>
+        Gadget Title:<br>
+        <input type="text" id="gadgetTitle" length="60">
+        <br>
+        <input type="checkbox" name="remaining" id="showremaining">Show number of remaining tasks<br>
+        <input type="checkbox" name="total" id="showtotal">Show total number of tasks<br>
+        <br>
+        Height:<br>
+        <input type="text" id="varHeight" length="40">
+        <br>
+        Width:<br>
+        <input type="text" id="varWidth" length="40">
+        <br>
+        Select Overflow Options:<br>
+        <select name="overflow" id="selectoverflow">
+        <option id="scrollselect" value="scroll">Auto Scroll</option>
+        <option id="autofitselect" value="autofit">Auto Fit</option>
+        </select><br>
+        <br>
+        Select a Visual Style:<br>
+        <select name="styles" id="selectstyle">
+        <option id="whiteselect" value="white">White</option>
+        <option id="blackselect" value="black">Black</option>
+        </select>
+    </span>
+</body>
+</html>

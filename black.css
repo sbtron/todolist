@@ -1,0 +1,93 @@
+    body
+        {
+            margin: 0;
+            width: 130px;
+            height: 160px;
+            border: 2px solid #1c212D;
+            padding: 0;
+            background-color: #0B0A12;
+        }
+    #gadgetTitle
+        {
+            font-family: Calibri;
+            text-align: center;
+            background-color: #1c212D;
+            color:#FFFFFF;
+}
+.AddBox,.EditBox {
+    border: 1px solid #575757;
+    font-family: Calibri;
+    background-color: #1c212D;
+    color: #CCCCCC;
+    position: absolute;
+    }
+.AddBox{
+    top:20px;
+    height:20px;
+    margin : 0px;
+    padding: 0px;
+}
+.EditBox{
+    visibility: hidden;
+    z-index: 10000;
+    overflow: visible;
+}
+.AddBtn,.RemoveBtn {
+    border: 0px solid #575757;
+    font-family: Calibri;
+    background-color: #0B0A12;
+    color: #CCCCCC;
+    position: absolute;
+    top:20px;
+    width: 15px;
+    height:20px;
+    margin : 0px;
+    padding: 0px;
+}
+
+.TaskList {
+    border: 1px solid #575757;
+    list-style: none;
+    position: absolute;
+    top:40px;
+    width: 100%;
+    margin : 0;
+    padding: 0;
+    color:#CCCCCC;
+    scrollbar-base-color: #000000;
+    scrollbar-arrow-color: #575757;
+    scrollbar-3dlight-color: #000000;
+    scrollbar-darkshadow-color: #000000;
+    scrollbar-face-color: #000000;
+    scrollbar-highlight-color: #575757;
+    scrollbar-shadow-color: #575757;
+    scrollbar-track-color: #1c212D;
+}
+
+.TaskItem {
+    margin: 0; padding: 0;
+}
+.TaskLabel,.TaskLabelCancelled {
+    display: block;
+    padding: 0 0.2em 0 25px;
+    text-indent: -25px;
+    font-family: Calibri;
+    height: 1%;
+}
+
+.TaskLabel,.TaskLabelCancelled, .EditBox{
+    font-size: 10pt;
+    text-align: left;
+}
+.TaskLabel{
+    color:#CCCCCC;
+}
+
+.TaskLabelCancelled {
+    color: #333333;
+    text-decoration:line-through;
+}
+.TaskItemMouseOver {
+    background: #2c374D;
+    color: #FFFFFF;
+}

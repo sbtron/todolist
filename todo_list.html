@@ -1,0 +1,358 @@
+<html>
+<head>
+    <title>Todo List</title>
+    <link rel="stylesheet" type="text/css" title="white" href="styles.css" />
+    <link rel="alternate stylesheet" type="text/css" title="black" href="black.css" />
+
+
+<!-- Edit in place and drag and drop thanks to Tim Taylor Consulting http://tool-man.org/ -->
+
+<script language="JavaScript" type="text/javascript" src="tool-man/core.js"></script>
+<script language="JavaScript" type="text/javascript" src="tool-man/events.js"></script>
+<script language="JavaScript" type="text/javascript" src="tool-man/css.js"></script>
+<script language="JavaScript" type="text/javascript" src="tool-man/coordinates.js"></script>
+<script language="JavaScript" type="text/javascript" src="tool-man/drag.js"></script>
+<script language="JavaScript" type="text/javascript" src="tool-man/dragsort.js"></script>
+<script language="JavaScript" type="text/javascript" src="tool-man/loader.js"></script>
+<script language="JavaScript">
+
+function focusAddBox(){
+if(document.getElementById('inputAddBox').value=="Add Task"){
+document.getElementById('inputAddBox').value="";
+document.getElementById('inputAddBox').focus();
+}
+}
+
+function blurAddBox(){
+if(document.getElementById('inputAddBox').value==""){
+document.getElementById('inputAddBox').value="Add Task";
+}
+}
+
+function keyPress() {
+if (event.keyCode == 13) {
+    addTasks();
+    }
+}
+
+function addTasks(){
+focusAddBox();
+if(document.getElementById('inputAddBox').value!=""){
+    addTask(document.getElementById('inputAddBox').value, false);
+    saveTasks();
+    }
+}
+
+function changeCheck(checkbox){
+var item = checkbox.parentNode;
+if(checkbox.getAttribute("CHECKED")== true)
+    {
+    item.className = "TaskLabelCancelled";
+    }
+else
+    {
+    item.className = "TaskLabel";
+    }
+saveTasks();
+}
+
+var findCheckbox = function(event){
+var children = this.getElementsByTagName("input")
+for (var i = 0; i < children.length; i++) {
+    var child = children[i];
+    if (child.getAttribute("type") == "checkbox")
+    {
+         changeCheck(child);
+    }
+}
+}
+
+function addTask(task,checked)
+{
+var list= document.getElementById('Tasks')
+var tasks= list.getElementsByTagName('li');
+number = tasks.length;
+var item = document.createElement("li");
+item.className = "TaskItem";
+var mdiv = document.createElement("div");
+mdiv.setAttribute("id","div"+number+"View");
+mdiv.style.display =  "inline";
+var lbl = document.createElement("label");
+lbl.setAttribute("for","check"+number);
+lbl.className = "TaskLabel";
+item.appendChild(lbl);
+var chk = document.createElement("input");
+chk.setAttribute("type","checkbox");
+chk.setAttribute("name","check"+number);
+chk.setAttribute("id","check"+number);
+if(checked == true || checked == "true")
+{
+    chk.CHECKED = true;
+    lbl.className = "TaskLabelCancelled";
+}
+lbl.appendChild(chk);
+lbl.innerHTML += " ";
+mdiv.innerHTML = task;
+lbl.appendChild(mdiv);
+
+document.getElementById('inputAddBox').value = "";
+item.onmouseover = function() {this.className = "TaskItemMouseOver";};
+item.onmouseout = function() {this.className = "TaskItem";};
+item.onclick = findCheckbox;
+list.appendChild(item);
+
+var editors = document.getElementById("editors");
+var edit = document.createElement("textarea");
+edit.setAttribute("name","div"+number+"Edit");
+edit.setAttribute("id","div"+number+"Edit");
+edit.className = "EditBox";
+editors.appendChild(edit);
+join("div"+number,true);
+dragsort.makeListSortable(document.getElementById("Tasks"));
+}
+
+function removeTasks()
+{
+var tasks= document.getElementById('Tasks').getElementsByTagName('li');
+for(var i=0;i<tasks.length;i++)
+{
+    var input = tasks[i].getElementsByTagName('input');
+    for(var j=0;j<input.length;j++)
+    {
+        var checked = input[j].getAttribute("CHECKED");
+        if (checked == true)
+        {
+            tasks[i].removeNode(true);
+            i--;
+        }
+    }
+}
+saveTasks();
+}
+
+function saveTasks()
+{
+var list= document.getElementById('Tasks')
+var tasks= list.getElementsByTagName('li');
+number = tasks.length;
+System.Gadget.Settings.write("TaskCount",number);
+var checked = new Array(number);
+for(var i=0;i<number;i++)
+{
+    var labels = tasks[i].getElementsByTagName('label');
+    for(var j=0;j<labels.length;j++)
+    {
+    checked[i]= labels[j].children[0].getAttribute("CHECKED");
+    text = labels[j].innerText;
+    System.Gadget.Settings.write(i,text);
+    }
+}
+System.Gadget.Settings.write("checked",checked);
+updateGadgetTitle()
+adjustforoverflow();
+}
+
+function loadTasks(){
+var number = System.Gadget.Settings.read("TaskCount");
+var checked = System.Gadget.Settings.read("checked");
+for(var i=0;i<number;i++)
+    {
+    var data = System.Gadget.Settings.read(i);
+    var check = checked;
+    if(checked.indexOf(",")>=0)
+    {
+        check = checked.substring(0,checked.indexOf(","));
+    }
+    checked = checked.substring(check.length+1);
+    addTask(data,check);
+    }
+}
+
+function loadSetting(settingName)
+{
+var settingvar = System.Gadget.Settings.readString(settingName);
+
+if (settingvar == "")
+{
+switch(settingName){
+case "height":
+    settingvar ="160";
+    break
+case "width":
+    settingvar = "130";
+    break
+case "style":
+    settingvar = "white";
+    break
+case "overflow":
+    settingvar = "scroll";
+    break
+case "title":
+    settingvar = "Todo List";
+    break
+case "showtotal":
+    settingvar = true;
+    break
+case "showremaining":
+    settingvar = false;
+    break
+default:
+    settingvar = null;
+    break
+    }
+}
+
+if(settingvar == "True"){settingvar = true;}
+if(settingvar == "False"){settingvar = false;}
+
+return settingvar;
+}
+
+function refreshGadget()
+{
+var height = loadSetting("height");
+var width = loadSetting("width");
+var style = loadSetting("style");
+var overflow = loadSetting("overflow");
+
+setGadgetSize(height,width);
+updateGadgetTitle();
+setActiveStyleSheet(style);
+setOverflow(overflow);
+}
+
+function init()
+{
+loadTasks();
+refreshGadget();
+if(document.getElementById('Tasks').style.overflow=="visible")
+{
+var autoheight = System.Gadget.Settings.read("autoheight");
+if(autoheight!="" || autoheight>document.body.style.height)
+{
+document.body.style.height = autoheight+"px";
+}
+var autowidth = System.Gadget.Settings.read("autowidth");
+if(autowidth!="" || autowidth>document.body.style.width)
+{
+document.body.style.width = autowidth+"px";
+}
+}
+}
+
+//function borrowed from Paul Stubb's blog: http://blogs.msdn.com/pstubbs/archive/2005/09/12/464173.aspx
+function setActiveStyleSheet(title)
+{
+var i, a, main;
+for(i=0; (a = document.getElementsByTagName("link")[i]); i++) {
+    if(a.getAttribute("rel").indexOf("style") != -1 && a.getAttribute("title"))
+    {
+        a.disabled = true;
+        if(a.getAttribute("title") == title) a.disabled = false;
+    }
+}
+}
+
+function updateGadgetTitle() {
+var title = loadSetting("title");
+var showtotal = loadSetting("showtotal");
+var showremaining = loadSetting("showremaining");
+var gtitle = document.getElementById('gadgetTitle');
+gtitle.innerText = title;
+if(showtotal || showremaining){
+    gtitle.innerText += " (";
+    if(showremaining){gtitle.innerText += getRemaining();}
+    if(showtotal && showremaining){gtitle.innerText += "/";}
+    if(showtotal){gtitle.innerText += document.getElementById('Tasks').getElementsByTagName('li').length;}
+    gtitle.innerText += ")";
+}
+}
+
+function getRemaining(){
+var remaining = 0;
+var checks = document.getElementById('Tasks').getElementsByTagName('input');
+for(var j=0;j<checks.length;j++)
+{
+    if(!(checks[j].checked))
+    {
+        remaining +=1;
+    }
+}
+return remaining;
+}
+
+function setGadgetSize(height,width) {
+document.body.style.height = height+"px";
+document.body.style.width = width+"px";
+var temp = (parseInt(width) - 32);
+document.getElementById("inputAddBox").style.width = temp+"px";
+document.getElementById("inputAdd").style.left = temp+"px";
+temp = (parseInt(width) - 17);
+document.getElementById("inputRemove").style.left = temp+"px";
+temp = (parseInt(height) - 44);
+document.getElementById("Tasks").style.height = temp+"px";
+temp = (parseInt(width) - 4);
+document.getElementById("Tasks").style.width = temp+"px";
+}
+
+function setOverflow(overflow)
+{
+if(overflow=="autofit"){
+document.getElementById('Tasks').style.overflow = "visible";
+}
+else{
+document.getElementById('Tasks').style.overflow = "auto";
+}
+}
+
+function adjustforoverflow()
+{
+if(document.getElementById('Tasks').style.overflow=="visible"){
+    var listheight= document.getElementById('Tasks').offsetHeight;
+    var autoheight = (parseInt(listheight) + 44);
+    var height = loadSetting("height");
+    if(autoheight > height){
+    document.body.style.height = autoheight+"px";
+    System.Gadget.Settings.write("autoheight",autoheight);
+    }
+    else
+    {
+    document.body.style.height = height+"px";
+    }
+    var listwidth= document.getElementById('Tasks').offsetWidth;
+    var autowidth = (parseInt(listwidth) + 4);
+    var width = loadSetting("width");
+    if(autowidth > width){
+    document.body.style.width = autowidth+"px";
+    System.Gadget.Settings.write("autowidth",autowidth);
+    }
+    else
+    {
+    document.body.style.width = width+"px";
+    }
+}
+}
+
+System.Gadget.settingsUI = "settings.html";
+System.Gadget.onSettingsClosed = SettingsClosed;
+
+function SettingsClosed() {
+    refreshGadget();
+    adjustforoverflow();
+}
+
+</SCRIPT>
+</head>
+<body onLoad="init()">
+    <div id="gadgetTitle">
+        Todo List
+    </div>
+    <input name="inputAddBox" type="text" class="AddBox" onkeypress="keyPress()"  onfocus="focusAddBox()" onblur="blurAddBox()" value="Add Task">
+    <input name="inputAdd" type="button" class="AddBtn" onclick="addTasks()" value="+">
+    <input name="inputRemove" type="button" class="RemoveBtn" onclick="removeTasks()" value="x">
+    <div id="editors">
+    </div>
+    <ul class="TaskList" id="Tasks">
+    </ul>
+ </body>
+</html>
